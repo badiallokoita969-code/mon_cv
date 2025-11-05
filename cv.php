@@ -1,0 +1,669 @@
+
+<?php
+// Traitement du formulaire au tout début
+require_once 'connexion.php';
+$messageEnvoye = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nom = htmlspecialchars(trim($_POST["nom"]));
+    $email = htmlspecialchars(trim($_POST["email"]));
+    $message = htmlspecialchars(trim($_POST["message"]));
+
+    if (!empty($nom) && !empty($email) && !empty($message)) {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO contact (nom, email, message) VALUES (?, ?, ?)");
+            $stmt->execute([$nom, $email, $message]);
+            $messageEnvoye = "<div class='confirmation'>✅ Votre message a bien été envoyé.</div>";
+        } catch (PDOException $e) {
+            $messageEnvoye = "<div class='erreur'>❌ Erreur lors de l'envoi : " . $e->getMessage() . "</div>";
+        }
+    } else {
+        $messageEnvoye = "<div class='erreur'>❌ Veuillez remplir tous les champs.</div>";
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon CV</title>
+  <link rel="stylesheet" href="style.css"> <!-- si tu veux mettre le CSS dans un fichier externe -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+  <style>
+    /* Styles internes CSS */
+    body {
+      background-color: #f8f8f8;
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    nav {
+      background-color: #DCC69C;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2B2B2B;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #2B2B2B;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background-color: #2B2B2B;
+      color: #fff;
+    }
+
+    .burger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .burger span {
+      height: 3px;
+      width: 25px;
+      background-color: #2B2B2B;
+      margin: 4px 0;
+      border-radius: 2px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .nav-links {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        background-color: #DCC69C;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        display: none;
+      }
+
+      .nav-links.show {
+        display: flex;
+      }
+
+      .burger {
+        display: flex;
+      }
+    }
+.hero {
+  height: 100vh; /* hauteur = 100% de la hauteur de l'écran */
+  width: 100%;   /* largeur = toute la largeur de la page */
+
+  background-image: url('image/image_cv.webp');
+  background-size: cover; /* l’image couvre tout sans se répéter */
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  padding: 60px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* assombrit l'image pour lisibilité */
+  z-index: -1;
+}
+
+.hero h1 {
+  font-size: 3em;
+  color: #fff;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 5px #000;
+}
+
+.hero p {
+  font-size: 1.3em;
+  color: #f0f0f0;
+  margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-shadow: 1px 1px 4px #000;
+}
+
+.btn-cv {
+  background-color: #2B2B2B;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn-cv:hover {
+  background-color: #444;
+}
+
+/* Animation typewriter */
+.typed-text {
+  font-weight: bold;
+  color: #DCC69C;
+}
+
+.cursor {
+  display: inline-block;
+  width: 1px;
+  background-color: #2B2B2B;
+  animation: blink 0.7s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+/* Titre de section */
+.section-title {
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 40px;
+  color: #2B2B2B;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  margin: auto;
+  max-width: 800px;
+  padding: 0 20px;
+  border-left: 3px solid #DCC69C;
+}
+
+.timeline-item {
+  margin-bottom: 40px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 5px;
+  width: 15px;
+  height: 15px;
+  background-color: #2B2B2B;
+  border: 3px solid #DCC69C;
+  border-radius: 50%;
+}
+
+.timeline-date {
+  font-weight: bold;
+  color: #DCC69C;
+  margin-bottom: 8px;
+}
+
+.timeline-content h3 {
+  margin-bottom: 5px;
+  font-size: 1.2em;
+  color: #2B2B2B;
+}
+
+.timeline-content p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .timeline {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .timeline-item {
+    padding-left: 0;
+  }
+
+  .timeline-item::before {
+    display: none;
+  }
+}
+.experience-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: auto;
+ background-position: center; /* Centrée */
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
+}
+
+/* Optionnel : ajout d’un filtre sombre pour améliorer la lisibilité du texte */
+.experience-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
+  z-index: -1;
+}
+.experience-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.experience-card h3 {
+  color: #2B2B2B;
+  margin-bottom: 10px;
+}
+
+.experience-card .date {
+  color: #DCC69C;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.experience-card p {
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Animation active */
+.experience-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.contact-container {
+  max-width: 1000px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* gauche = info, droite = formulaire */
+  background-image: url("image/image_arriere_plan.jpg");
+  background-size: cover;
+  background-position: center;
+  height: 70vh;
+  width: 100%;
+  gap: 40px;
+  padding: 40px 40px;
+  align-items: start;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+  border-radius: 20px;
+}
+
+.contact-container.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.contact-info p {
+  font-size: 1.1em;
+  color:rgb(241, 231, 231);
+  margin-bottom: 15px;
+}
+
+.contact-info a {
+  color: #DCC69C;
+  text-decoration: none;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1em;
+  width: 100%;
+}
+
+.contact-form button {
+  background-color: #2B2B2B;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contact-form button:hover {
+  background-color: #444;
+}
+
+@media (max-width: 768px) {
+  .contact-container {
+    grid-template-columns: 1fr;
+  }
+}
+.animate-text span {
+  opacity: 0;
+  display: inline-block;
+  transform: translateY(20px);
+  animation: letterFade 0.6s forwards;
+}
+
+@keyframes letterFade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.confirmation, .erreur {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  animation: fadeIn 0.7s ease;
+}
+
+.confirmation {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.erreur {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+.footer-simple {
+  background-color: #DCC69C;
+  color: #2B2B2B;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.95em;
+  margin-top: 50px;
+}
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Mon CV</div>
+    <div class="burger" id="burger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#accueil" class="active">Accueil</a>
+      <a href="#etude">Études</a>
+      <a href="#experience">Expérience</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Sections du CV -->
+  
+  <section id="accueil">
+  <div class="hero">
+    <h1>Bonjour, je suis <span class="typed-text"></span><span class="cursor">|</span></h1>
+    <p>Je suis passionné par le développement web et l'innovation numérique. Mon objectif est de transformer les idées en solutions concrètes.</p>
+    
+  </div>
+</section>
+<section id="etude">
+  <h2 class="section-title">🎓 Parcours Académique</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-date">2023 - 2025</div>
+      <div class="timeline-content" data-aos="fade-in" data-aos-duration="timeline-content" >
+        <h3>Licence2 en Informatique de Gestion</h3>
+        <p>Université [IAM]<br>
+        Apprentissage du développement web, base de données, systèmes d'information et gestion d'entreprise.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2022- 2023</div>
+      <div class="timeline-content" data-aos-duration="timeline-content">
+        <h3>Baccalauréat Série [TSECO]</h3>
+        <p> Au Lycée [ Gnéetaso]<br>
+        Mention Assez Bien – Spécialité : Economie / Mathématiques / comptabilité.</p>
+      </div>
+    </div>
+
+    <!-- Tu peux ajouter d'autres étapes ici -->
+    <div class="timeline-item" >
+      <div class="timeline-date">2019 - 2020</div>
+      <div class="timeline-content"data-aos-duration="timeline-content">
+        <h3>DEF </h3>
+        <p> Ecole  [EFEK]<br>
+       </p>
+      </div>
+    </div>
+
+   
+  </div>
+</section>
+<section id="experience">
+  <h2 class="section-title">💼 Mes Expériences</h2>
+  <div class="experience-container">
+    <div class="experience-card hidden"   data-aos="fade-in" data-aos-duration="experience-card hidden">
+      <h3>Développeur Web – Projet de Fin d'année MICASA</h3>
+      <span class="date">2024 - Aujourd'hui</span>
+      <p>Conception complète d’un site de réservation hôtelière avec interface client et admin,dans le cadre de la validation du Data Base Challenge. Stack : PHP, MySQL, HTML, CSS, JS.</p>
+    </div>
+    <div class="experience-card hidden" data-aos="fade-in" data-aos-duration="experience-card hidden">
+      <h3>formation – Bureautique</h3>
+      <span class="date">Été 2023</span>
+      <p>Apprentissage du Word, de l'Excel et du Power Point. Environnement : ciber.</p>
+    </div>
+    <div class="experience-card hidden" data-aos="fade-in" data-aos-duration="experience-card hidden">
+      <h3>Déleloppement– Licence1</h3>
+      <span class="date">2023 - 2024</span>
+      <p>Création d'un site web responsive sans la base de donnée.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <h2 class="section-title">📞 Me Contacter</h2>
+  <div class="contact-container hidden">
+    <div class="contact-info">
+      
+    <!-- ✅ Message s'affiche ici -->
+    <div style="grid-column: span 2;">
+      <?= $messageEnvoye ?>
+    </div>
+
+    <!-- ✅ Infos de contact -->
+    <div class="contact-info">
+      <p><strong>Email :</strong> <a href="mailto:badiallo.koita1@icloud.com">badiallo.koita1@icloud.com</a></p>
+      <p><strong>Téléphone :</strong> <a href="tel:+22376222745">+223 76 22 27 45</a></p>
+      <p><strong>WhatsApp :</strong> <a href="https://wa.me/22376222745" target="_blank">Discuter</a></p>
+    </div>
+
+    <!-- ✅ Formulaire -->
+    <form class="contact-form" method="post" action="#contact">
+      <input type="text" name="nom" placeholder="Votre nom" required />
+      <input type="email" name="email" placeholder="Votre email" required />
+      <textarea name="message" rows="5" placeholder="Votre message" required></textarea>
+      <button type="submit">Envoyer</button>
+    </form>
+
+  </div>
+
+   
+</div>
+</section>
+ </div>
+</section>
+<footer class="footer-simple">
+  <p>&copy; <?= date('Y') ?> Badiallo Koïta. Tout droit contacter moi.</p>
+</footer>
+  <script>
+    // Menu responsive
+    const burger = document.getElementById("burger");
+    const navLinks = document.getElementById("navLinks");
+
+    burger.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+    });
+
+    // Mise en évidence du lien actif
+    const links = document.querySelectorAll(".nav-links a");
+
+    links.forEach(link => {
+      link.addEventListener("click", () => {
+        links.forEach(l => l.classList.remove("active"));
+        link.classList.add("active");
+        navLinks.classList.remove("show"); // ferme le menu mobile
+      });
+    });
+  </script>
+  <script>
+  const typedTextSpan = document.querySelector(".typed-text");
+  const cursorSpan = document.querySelector(".cursor");
+
+  const textArray = ["Badiallo Koïta", "Développeur Web", "Étudiante en Informatique de Gestion"," à l'intitut Africain de Management (IAM)"];
+  const typingDelay = 100;
+  const erasingDelay = 60;
+  const newTextDelay = 1500;
+  let textArrayIndex = 0;
+  let charIndex = 0;
+
+  function type() {
+    if (charIndex < textArray[textArrayIndex].length) {
+      typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
+      charIndex++;
+      setTimeout(type, typingDelay);
+    } else {
+      setTimeout(erase, newTextDelay);
+    }
+  }
+
+  function erase() {
+    if (charIndex > 0) {
+      typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
+      charIndex--;
+      setTimeout(erase, erasingDelay);
+    } else {
+      textArrayIndex++;
+      if (textArrayIndex >= textArray.length) textArrayIndex = 0;
+      setTimeout(type, typingDelay + 200);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (textArray.length) setTimeout(type, 1000);
+  });
+</script>
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+      }
+    });
+  });
+
+  const hiddenElements = document.querySelectorAll(".hidden");
+  hiddenElements.forEach(el => observer.observe(el));
+</script>
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("show");
+      }
+    });
+  });
+
+  const hiddenElements = document.querySelectorAll(".hidden");
+  hiddenElements.forEach(el => observer.observe(el));
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const animatedTexts = document.querySelectorAll(".animate-text");
+
+    animatedTexts.forEach(el => {
+      const text = el.textContent;
+      el.innerHTML = "";
+      [...text].forEach((char, i) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+        span.style.animationDelay = `${i * 0.03}s`;
+        el.appendChild(span);
+      });
+    });
+  });
+</script>
+<script>
+  // Cacher automatiquement le message de confirmation après 5 secondes
+  window.addEventListener('DOMContentLoaded', () => {
+    const messageBox = document.querySelector('.confirmation, .erreur');
+    if (messageBox) {
+      setTimeout(() => {
+        messageBox.style.opacity = '0';
+        messageBox.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => messageBox.remove(), 500); // Ensuite, on le retire du DOM
+      }, 5000); // 5000ms = 5 secondes
+    }
+  });
+</script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+
+</body>
+</html>
